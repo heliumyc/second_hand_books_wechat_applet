@@ -1,0 +1,65 @@
+<template>
+  <view>
+    <!-- 垃圾微信小程序以及wepy不支持repeat子组件的分别渲染, 只能出此下策了 -->
+    <repeat for="{{books}}" key="index" index="index" item="item">
+      <!--<view class="card-wrapper">-->
+        <!--<i-card title="{{item.title}}" extra="¥{{item.price}}" i-class="card">-->
+          <!--&lt;!&ndash; 显示的内容 &ndash;&gt;-->
+          <!--<view slot="content">-->
+            <!--<view class="content-row">-->
+              <!--<view class="title-col">ISBN</view>-->
+              <!--<view class="content-col">{{item.isbn}}</view>-->
+            <!--</view>-->
+            <!--<view class="content-row">-->
+              <!--<view class="title-col">附注</view>-->
+              <!--<view class="content-col">{{item.note}}</view>-->
+            <!--</view>-->
+          <!--</view>-->
+          <!--&lt;!&ndash; 底栏的功能按钮 &ndash;&gt;-->
+          <!--<view slot="footer">-->
+            <!--<view class="footer-content">-->
+              <!--<view class="card-btn-wrapper left-btn">-->
+                <!--&lt;!&ndash; 由于不能拆分子组件在内部搞, 所以只能这样获取不同卡片的信息了 &ndash;&gt;-->
+                <!--<button class="card-btn text-btn" @tap="handleCopy({{item.contact}})">复制联系方式</button>-->
+              <!--</view>-->
+              <!--<view class="card-btn-wrapper right-btn">-->
+                <!--<button class="card-btn" @tap="handleEnter({{item}})"><view><i-icon type="enter"/></view></button>-->
+                <!--&lt;!&ndash;<button class="card-btn" @tap="handleFavorite({{index}})">&ndash;&gt;-->
+                <!--&lt;!&ndash;<view class="{{item.favorite?'rotate':''}}" style="transform-origin: center;">&ndash;&gt;-->
+                <!--&lt;!&ndash;<i-icon type="add"/>&ndash;&gt;-->
+                <!--&lt;!&ndash;</view>&ndash;&gt;-->
+                <!--&lt;!&ndash;</button>&ndash;&gt;-->
+              <!--</view>-->
+            <!--</view>-->
+          <!--</view>-->
+        <!--</i-card>-->
+      <!--</view>-->
+    </repeat>
+
+
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index')
+  export default class PostListPanel extends wepy.component {
+    data = {
+      userId: '',
+      books: [],
+      contact: ''
+    }
+    methods = {
+
+    }
+
+    bookListRequest(userId) {
+
+    }
+
+  }
+</script>
+
+<style>
+
+</style>

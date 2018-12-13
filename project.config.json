@@ -1,0 +1,19 @@
+{
+	"description": "fuck wechat fuck tencent",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true,
+		"nodeModules": false,
+		"uglifyFileName": false
+	},
+	"compileType": "miniprogram",
+	"appid": "wxb6ca20f671a944b1",
+	"projectname": "bookexchange",
+	"miniprogramRoot": "dist/",
+	"cloudfunctionRoot": "functions/",
+	"libVersion": "2.4.0",
+	"condition": {}
+}

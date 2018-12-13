@@ -1,0 +1,241 @@
+<!-- 搜索页面列表主体 -->
+<template>
+  <view
+    @touchmove="handleTouchMove"
+    @touchstart="handleTouchStart"
+    @touchend="handleTouchEnd">
+    <!-- 垃圾微信小程序以及wepy不支持repeat子组件的分别渲染, 只能出此下策了 -->
+    <repeat for="{{hits}}" key="index" index="index" item="item">
+      <view class="card-wrapper">
+        <i-card title="{{item.title}}" extra="¥{{item.price}}" i-class="card">
+          <!-- 显示的内容 -->
+          <view slot="content">
+            <view class="content-row">
+              <view class="title-col">ISBN</view>
+              <view class="content-col">{{item.isbn}}</view>
+            </view>
+            <view class="content-row">
+              <view class="title-col">联系方式</view>
+              <view class="content-col">{{item.contact}}</view>
+            </view>
+            <view class="content-row">
+              <view class="title-col">附注</view>
+              <view class="content-col">{{item.note}}</view>
+            </view>
+          </view>
+          <!-- 底栏的功能按钮 -->
+          <view slot="footer">
+            <view class="footer-content">
+              <view class="card-btn-wrapper left-btn">
+                <!-- 由于不能拆分子组件在内部搞, 所以只能这样获取不同卡片的信息了 -->
+                <button class="card-btn text-btn" @tap="handleCopy({{item.contact}})">复制联系方式</button>
+              </view>
+              <view class="card-btn-wrapper right-btn">
+                <button class="card-btn" @tap="handleEnter({{item}})"><view><i-icon type="enter"/></view></button>
+                <!--<button class="card-btn" @tap="handleFavorite({{index}})">-->
+                  <!--<view class="{{item.favorite?'rotate':''}}" style="transform-origin: center;">-->
+                    <!--<i-icon type="add"/>-->
+                  <!--</view>-->
+                <!--</button>-->
+              </view>
+            </view>
+          </view>
+        </i-card>
+      </view>
+    </repeat>
+    <i-toast id="toast"></i-toast>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index');
+
+  export default class SearchResultPanel extends wepy.component {
+    props = {
+      hits: {
+        type: Array,
+        default: []
+      }
+    }
+
+    methods = {
+      handleTouchMove(ev) {
+        this.$emit('touchmove', ev)
+      },
+
+      handleTouchStart(ev) {
+        this.$emit('touchstart', ev)
+      },
+
+      handleTouchEnd() {
+        this.$emit('touchend')
+      },
+
+      async handleFavorite(index) {
+        // 将书籍添加到收藏中, 如果已经在收藏里面的, 就在旁边标注, 已添加, 然后图标旋转90度
+        // 首先要判断是不是已经收藏过了, 如果是, 执行叉叉的逻辑, 如果不是, 执行加号的逻辑
+        // 这一步不需要刷新, 按照请求返回的结果, 直接在结果里面修改, 但是api要改变了, 加入是否收藏的属性
+        // 为什么传入index呢, 因为鬼知道为什么tm的wepy传入的是值不是引用
+        // console.log(itemObj, this.hits[index])
+        // console.log(itemObj === this.hits[index]) // false !!!!!!!!!
+        let item = this.hits[index]
+        // 判断是否已经添加
+        if (item.favorite) {
+          // 已经添加, 此时取消
+          let success = true; // 请求结果
+          if (success) {
+            item.favorite = false;
+            $Toast({
+              content: '取消成功! =ω=',
+              type: 'success',
+              duration: 1
+            });
+          }
+          else {
+            $Toast({
+              content: '取消失败哒! Σ(っ°Д °)っ',
+              type: 'error',
+              duration: 1
+            });
+          }
+        }
+        else {
+          // 向后台请求
+          let success = true; // 请求结果
+
+          // 添加成功
+          if (success) {
+            item.favorite = true;
+            $Toast({
+              content: '添加成功! =ω=',
+              type: 'success',
+              duration: 1
+            })
+          }
+          else {
+            $Toast({
+              content: '添加失败哒! Σ(っ°Д °)っ',
+              type: 'error',
+              duration: 1
+            })
+          }
+        }
+      },
+
+      handleEnter(item) {
+        // 跳转到该书的书单中
+        wepy.navigateTo({
+          url: '/pages/post-list?user='+item.userId
+        })
+      },
+
+      async handleCopy(data) {
+        // 点击复制联系方式
+        wx.setClipboardData({
+          data: data,
+          success: function(res) {
+            wx.getClipboardData({
+              success: function(res) {
+                console.log(res.data) // data
+              }
+            })
+          }
+        })
+      }
+    }
+  }
+</script>
+
+<style lang="less">
+  @card-margin: 30rpx;
+
+ // card样式, 用一个view包裹
+  .card-wrapper {
+    margin-bottom: @card-margin;
+  }
+
+  // 底栏的按钮
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .card-btn-wrapper {
+    height: auto;
+    width: auto;
+    display: flex;
+    vertical-align: top;
+  }
+
+  .right-btn {
+    flex-direction: row-reverse;
+  }
+
+  .card-btn {
+    background: none;
+    border: none;
+    height: 50rpx;
+    margin: 0;
+    padding: 0;
+    vertical-align: top;
+  }
+
+  .right-btn view {
+    display: inline-block;
+    line-height: 1;
+    vertical-align: top;
+  }
+
+  .card-btn::after {
+    border: none; // 微信只能这样清除btn样式
+  }
+
+  .right-btn {
+    font-size: 20pt;
+  }
+
+  .right-btn > button {
+    width: 80rpx;
+  }
+
+  .text-btn {
+    font-size: 10pt;
+    display:inline-block;
+    line-height:1;
+    color: #bbbec4;
+    // letter-spacing: 1pt;
+    // text-shadow: 0.01em 0.01em 0.01em #81899b !important;
+  }
+
+  // 卡片内容样式
+  .content-row {
+    margin-top: 15rpx;
+    width: 100%;
+  }
+
+  // 左边的标题
+  .title-col {
+    display: inline-block;
+    width: 20%;
+    margin-right: 15rpx;
+  }
+
+  // 右边的内容
+  .content-col {
+    display: inline-block;
+    width: auto;
+    font-weight: normal;
+  }
+
+  // 加阴影效果不好, 感觉像非主流, 没有PC预览效果好
+  // 主要是win字体渲染literally like shit, 移动端正常渲染
+  .card {
+    font-weight: bold;
+  }
+
+  // 这个旋转有点问题的, 可能和容器不是正方形有关, 先不管
+  .rotate {
+    transform: rotate(45deg);
+  }
+</style>

@@ -1,0 +1,159 @@
+<!-- 搜索首页的搜索框 -->
+<template>
+  <view class="flex-wrapper" style="height: inherit">
+      <view style="margin: auto;">
+        <image src="../static/logo.png" class="logo" mode="aspectFit"/>
+        <view class="search-box {{inputFocused?'box-focused':''}}">
+          <view class="search-input-wrapper">
+            <input placeholder="输入标题或者ISBN号"
+              value="{{query}}"
+              class="search-input {{inputFocused?'input-focused':''}}"
+              @focus="handleFocus" @blur="handleBlur" @input="handleInput"
+              @confirm="handleConfirm"/>
+            <view wx:if="{{query!==''}}"
+              style="display:flex; align-items:center; color: #80848f;"
+              @tap="handleClear">
+              <i-icon type="delete" size="28"/>
+            </view>
+          </view>
+          <button class="search-btn" @tap="handleTapSearch">
+            <text>搜索</text>
+          </button>
+        </view>
+      </view>
+      <i-toast id="toast" />
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index');
+  export default class SearchEntry extends wepy.component {
+    data = {
+      inputFocused: false,
+      query: ''
+    }
+
+    methods = {
+      handleFocus() {
+        // console.log('focused')
+        this.inputFocused = true
+      },
+
+      handleBlur() {
+        // console.log('blurred')
+        this.inputFocused = false
+      },
+
+      handleInput({ detail }) {
+        this.query = detail.value
+      },
+
+      handleConfirm({ detail }) {
+        this.query = detail.value
+        this.doSearch(this.query)
+        this.query = ''
+      },
+
+      handleTapSearch() {
+        this.doSearch(this.query)
+        this.query = ''
+      },
+
+      handleClear() {
+        this.query = ''
+      }
+    }
+
+    doSearch(query) {
+      if (query === '') {
+        $Toast({
+          content: 'ooooooops, 检索式不能为空',
+          type: 'warning'
+        })
+      }
+      else {
+        wepy.navigateTo({
+          url: '/pages/search-result-page?query='+this.query
+        })
+      }
+    }
+  }
+</script>
+
+<style lang="less" scoped>
+
+  .flex-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items:center;
+  }
+
+  .search-box {
+    display: flex;
+    box-shadow: 0 2px 2px 0 rgba(45, 139, 240, 0.08), 0 0 0 1px rgba(45, 140, 240,0.08);
+    font-size: 11pt;
+    width: 600rpx;
+    border-radius: 8px;
+    border: none;
+    justify-content: space-between;
+    margin-bottom: 200rpx;
+  }
+
+  .box-focused {
+    box-shadow: 0 3px 8px 0 rgba(45, 140, 240, 0.25), 0 0 0 1px rgba(45, 140, 240,0.08)
+  }
+
+  .input-focused {
+    text-shadow: 0.01em 0.01em 0.01em #495060 !important;
+  }
+
+  .search-input-wrapper {
+    height: 100%;
+    width: 100%;
+    margin: auto 30rpx;
+    border: none;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .search-input {
+    border: none;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    text-shadow: 0.01em 0.01em 0.01em #d5d6d8 !important;
+    color: #495060;
+  }
+
+  .search-btn {
+    border: none;
+    width: 150rpx;
+    height: 100rpx;
+    padding: 0;
+    background-color: #2d8cf0;
+    border-radius: 0 8px 8px 0;
+    margin: 0;
+  }
+
+  .search-btn::after {
+    border: none;
+  }
+
+  .search-btn > text {
+    border: none;
+    font-size: 12pt;
+    color: #f8f8f9;
+    letter-spacing: 10rpx;
+    text-shadow: 0.01em 0.01em 0.01em #e0dfdf !important;
+    text-align: center;
+    line-height: 100rpx;
+  }
+
+  .logo {
+     height: 200rpx;
+     width: 200rpx;
+     margin: 100rpx 200rpx;
+  }
+
+</style>

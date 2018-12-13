@@ -1,0 +1,40 @@
+<template>
+  <view>
+    <view>
+
+    </view>
+    <bookListPanel>
+    </bookListPanel>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import PostListPanel from '../components/post-list-panel'
+  export default class BookList extends wepy.page {
+    config = {
+      navigationBarTitleText: '用户书单',
+      usingComponents: {
+        'i-icon': '../static/iview/icon/index',
+        'i-toast': '../static/iview/toast/index',
+        'i-card': '../static/iview/card/index'
+      }
+    }
+    components = {
+      postListPanel: PostListPanel
+    }
+    data = {
+
+    }
+    methods = {
+
+    }
+    onLoad(option) {
+      console.log(option)
+    }
+  }
+</script>
+
+<style>
+
+</style>

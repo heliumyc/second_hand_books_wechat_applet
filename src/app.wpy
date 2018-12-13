@@ -1,0 +1,80 @@
+<style lang="less">
+
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function'
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/index',
+      'pages/search-result-page',
+      'pages/book-list'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#2d8cf0',
+      navigationBarTitleText: 'S/H book',
+      navigationBarTextStyle: 'white',
+      enablePullDownRefresh: true
+    }
+  }
+
+  globalData = {
+    userInfo: null,
+    sysInfo: null,
+    sessionId: null,
+  }
+
+  constructor () {
+    super()
+    this.use('promisify')
+    this.use('requestfix')
+  }
+
+  onLaunch() {
+    console.log("Launching...")
+    // wx.cloud.init()
+  }
+
+  sleep (s) {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('promise resolved')
+      }, s * 1000)
+    })
+  }
+
+  async getUserInfo() {
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    try {
+      let res = await wepy.getUserInfo()
+      if (res) {
+        this.globalData.userInfo = res
+      }
+    } catch (e) {
+      console.log(e)
+    }
+    return this.globalData.userInfo
+  }
+
+  async getSysInfo() {
+    if (this.globalData.sysInfo) {
+      return this.globalData.sysInfo
+    }
+    try {
+      let res = await wepy.getSystemInfo()
+      if (res) {
+        this.globalData.sysInfo = res
+      }
+    } catch (e) {
+      console.log(e)
+    }
+    return this.globalData.sysInfo
+  }
+}
+</script>

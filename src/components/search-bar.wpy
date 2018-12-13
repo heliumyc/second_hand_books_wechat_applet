@@ -1,0 +1,110 @@
+<!-- 在列表页上面的搜索栏 -->
+<template>
+  <view>
+    <view class="search-input-wrapper">
+      <!-- 输入栏 -->
+      <input class="search-input" value="{{query}}"
+        placeholder="输入标题或者ISBN号"
+        @input="handleInput" @confirm="handleConfirm"/>
+      <!-- 清除的叉叉 -->
+      <view wx:if="{{query!==''}}"
+        style="display:flex; align-items:center; color: #80848f;"
+        @tap="handleClear">
+        <i-icon type="delete" size="28"/>
+      </view>
+    </view>
+    <!-- 搜索按钮 -->
+    <button class="search-btn" @tap="handleTapSearch">
+      <text>搜索</text>
+    </button>
+    </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index')
+  export default class SearchBar extends wepy.component {
+    props = {
+      query: {
+        type: String,
+        default: ""
+      }
+    }
+
+    methods = {
+      handleClear() {
+        // 点击输入栏中的叉叉
+        this.query = ''
+      },
+
+      handleInput({ detail }) {
+        // 一旦输入内容
+        this.query = detail.value // detail.value是输入栏的内容
+      },
+
+      async handleConfirm({ detail }) {
+        // 输入法中点击完成或者回车
+        this.query = detail.value // detail.value是输入栏的内容
+        this.$emit('clearEvent') // 清除数据防止数据重复
+        await this.$emit('searchEvent', this.query)
+      },
+
+      async handleTapSearch() {
+        // 点击搜索按钮
+        // this.$emit('clearEvent') // 清除数据防止数据重复
+        // 不需要显式地发送事件, 事件传到到上一级之后就自动clear, 这里传送反而会可能有异步的bug
+        await this.$emit('searchEvent', this.query)
+      }
+    }
+
+  }
+</script>
+
+<style lang="less" scoped>
+  .search-input-wrapper {
+    height: 100%-30rpx;
+    width: 100%;
+    margin: auto 20rpx auto 30rpx;
+    background-color: white;
+    border: none;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    padding-left: 30rpx;
+    padding-right: 10rpx
+  }
+
+  .search-input {
+    border: none;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    text-shadow: 0.01em 0.01em 0.01em #d5d6d8 !important;
+    color: #495060;
+    font-size: 12pt;
+  }
+
+  .search-btn {
+    width: 150rpx;
+    height: 100rpx;
+    padding: 0;
+    margin: 0;
+    background-color: transparent;
+    border-radius: 0 8px 8px 0;
+  }
+
+  // 微信必须这样才能清除边框
+  .search-btn::after {
+    border: none;
+  }
+
+  .search-btn > text {
+    border: none;
+    font-size: 12pt;
+    color: #f8f8f9;
+    letter-spacing: 10rpx;
+    text-shadow: 0.01em 0.01em 0.01em #e0dfdf !important;
+    text-align: center;
+    line-height: 100rpx;
+  }
+</style>

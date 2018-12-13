@@ -1,0 +1,352 @@
+<template>
+  <view style="height: inherit">
+
+    <i-action-sheet visible="{{ actionSheetVisible }}" actions="{{ actionSheetItems }}"
+                    show-cancel bind:cancel="handleDeleteCancel"
+                    bind:click="handleDelete" mask-closable="{{ false }}">
+      <view slot="header" style="padding: 16px">
+        <view style="color: #444;font-size: 16px">确定吗？</view>
+        <text>删除后无法恢复哦</text>
+      </view>
+    </i-action-sheet>
+
+    <!-- 显示书籍区 -->
+    <scroll-view scroll-y class="posts-panel" style="height: inherit">
+      <!-- 小程序不支持子组件分别渲染 -->
+      <repeat for="{{posts}}" key="index" index="index" item="item">
+        <i-swipeout  i-class="swipeout-item" operateWidth="{{140}}" unclosable="{{true}}" toggle="{{toggle}}">
+          <view slot="content">
+            <view class="swipeout-image">
+              <!--<i-icon size="20" color="#FFFFFF" type="document_fill"></i-icon>-->
+              <span style="color: #fff; font-size: 20px;">{{ item.title[0] || 'U'}}</span>
+            </view>
+            <view class="swipeout-des">
+              <view class="swipeout-des-title">
+                <view class="swipeout-des-h2">{{item.title}}</view>
+                <view class="swipeout-des-tag">
+                  ¥ {{item.price}}
+                </view>
+              </view>
+              <view class="swipeout-des-detail">{{item.note}}</view>
+            </view>
+          </view>
+          <view slot="button" class="swipeout-button-group" style="background:#2db7f5;">
+            <view class="swipeout-button" style="background:#2d8cf0;" @tap="handleDeleteAction">
+              <i-icon size="26" type="brush_fill"></i-icon>
+            </view>
+            <view class="swipeout-button" style="background:#ed3f14;" @tap="handleDeleteAction({{item.title}})">
+              <i-icon size="26" type="delete_fill"></i-icon>
+            </view>
+          </view>
+        </i-swipeout>
+      </repeat>
+    </scroll-view>
+
+    <!-- 右下方按钮区 -->
+    <view>
+      <view class="fixed-right-bottom circle-btn" style="z-index: 10;" @tap="handleSwitch">
+        <view style="position: relative; width: auto; top: 25%;">
+          <view :class="{rotate:addClicked, rotate_original:!addClicked}">
+            <i-icon type="add" size="28"  />
+          </view>
+        </view>
+      </view>
+      <view style="z-index: 5;" class="fixed-right-bottom circle-btn"
+            :class="{move_left: addClicked, move_original:!addClicked}" @tap="handleTapWrite">
+        <view style="position: relative; width: auto; top: 25%;" >
+          <view>
+            <i-icon type="brush" size="28"  />
+          </view>
+        </view>
+      </view>
+      <view style="z-index: 5;" class="fixed-right-bottom circle-btn"
+            :class="{move_up: addClicked, move_original:!addClicked}" @tap="handleTapScan">
+        <view style="position: relative; width: auto; top: 25%;">
+          <view>
+            <i-icon type="scan" size="28"  />
+          </view>
+        </view>
+      </view>
+    </view>
+    <!-- 遮罩 -->
+    <view hidden="{{!addClicked}}" class="cloak" @tap="handleSwitch"></view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index');
+  const bookTemplate = {title: 'Text Book 1', isbn: 'abcd3598jife', price: '15', note: 'hello!!!!!!'};
+  export default class Posts extends wepy.component {
+
+    props = {
+      sessionId: {
+        type: String,
+        default: ''
+      },
+      uid: {
+        type: Number,
+        default: -1
+      }
+    }
+
+    data = {
+      testList: Array.from(new Array(100),(val,index)=>index),
+      addClicked: false,
+      posts: [],
+      toggle : false,
+
+      actionSheetVisible: false,
+      actionSheetItems: [
+        {
+          name: '删除',
+          color: '#ed3f14'
+        }
+      ],
+    }
+
+    methods = {
+      handleSwitch() {
+        this.addClicked = !this.addClicked;
+        console.log('switched')
+      },
+
+      handleDeleteAction(title) {
+        console.log('delete action activated '+title);
+        this.actionSheetVisible = true;
+      },
+
+      handleDelete() {
+        const action = [...this.actionSheetItems];
+        action[0].loading = true;
+
+        this.actionSheetItems = action;
+
+        setTimeout(() => {
+          action[0].loading = false;
+          this.actionSheetVisible = false;
+          this.actionSheetItems = action;
+          this.toggle = !this.toggle;
+          this.$apply();
+        }, 2000);
+      },
+
+      handleDeleteCancel() {
+        this.actionSheetVisible = false;
+        this.toggle = !this.toggle;
+        console.log('delete action canceled')
+      },
+
+      handleTapWrite() {
+
+      },
+
+      handleTapScan() {
+        let that = this
+        wx.scanCode({
+          success(res) {
+            console.log(res)
+            that.getBookFromISBN(res.result)
+          }
+        })
+      },
+    }
+
+    onLoad() {
+      console.log(this.posts)
+      for (let i = 0; i < 10; i++) {
+        this.posts.push(bookTemplate)
+      }
+      console.log(this.posts)
+      this.$apply()
+    }
+
+    async getUserPosts() {
+      this.showLoadingToast()
+      if (this.sessionId === '' || this.uid === -1) {
+        this.hideLoadingToast()
+        return
+      }
+      try {
+        let res = await wepy.request({
+          url: 'https://wxmini.heliumyc.top/api/user/'+this.uid+'/posts'
+        })
+        let body = res.data
+        if (body.code === 0 && body.data) {
+          this.showSuccessToast()
+          this.posts = body.data.books
+        } else {
+          this.showErrorToast()
+        }
+      } catch (e) {
+        console.log(e)
+        this.showErrorToast()
+      }
+    }
+
+    async getBookFromISBN(isbnStr) {
+      let book = null
+      try {
+        let res = await wepy.request({
+          url: 'https://wxmini.heliumyc.top/v2/book/isbn/'+isbnStr,
+          header: {
+            'Content-Type': 'json'
+          },
+        })
+        if (res) {
+          book = {}
+          // load data to book
+        }
+      } catch (e) {
+        console.log(e)
+      }
+      return book
+    }
+
+    showLoadingToast() {
+      // 显示加载中的轻提示
+      $Toast.hide()
+      $Toast({
+        content: '非常努力地登陆中',
+        type: 'loading',
+        duration: 0
+      })
+    }
+
+    showErrorToast() {
+      $Toast.hide()
+      $Toast({
+        content: "获取失败...",
+        type: 'error',
+      })
+    }
+
+    showSuccessToast() {
+      this.hideLoadingToast()
+      $Toast({
+        content: "获取成功!",
+        type: 'success',
+      })
+    }
+
+  }
+</script>
+
+<style lang="less">
+
+  @transition-time: 0.15s;
+
+  .fixed-right-bottom {
+    position: fixed;
+    right: 50rpx;
+    bottom: 150rpx;
+    background: #2d8cf0;
+    color: white;
+  }
+
+  .circle-btn {
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    text-align: center;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.4), 0 0 0 2px rgba(0,0,0,0.01);
+  }
+
+  /* 右下按钮动画相关 */
+
+    .rotate_original {
+      transform: rotate(0);
+      transition: transform @transition-time linear;
+    }
+
+    .rotate {
+      transform: rotate(45deg);
+      transition: transform @transition-time linear;
+    }
+
+    .move_left {
+      transform: translate(-200rpx, 0) rotate(0deg);
+      transition: transform @transition-time linear;
+    }
+
+    .move_up {
+      transform: translate(0, -200rpx) rotate(0deg);
+      transition: transform @transition-time linear;
+    }
+
+    .move_original {
+      transform: rotate(45deg);
+      transition: transform @transition-time linear;
+      box-shadow: none;
+    }
+
+    .cloak {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 4;
+      background: rgba(0, 0, 0, 0.1);;
+      height: 100%;
+      width: 100%;
+    }
+
+
+  /* 滑动块相关 */
+
+    .swipeout-button-group{
+      height:100%;
+      width:100%;
+    }
+    .swipeout-button{
+      width:70px;
+      height: 100%;
+      float:left;
+      display: flex;
+      height:100%;
+      justify-content: center;
+      color:#fff;
+      align-items:center;
+    }
+    .swipeout-item{
+      border-bottom:#333 solid 1px;
+    }
+    .swipeout-des{
+      padding:0 15px;
+      margin-bottom:10px;
+      font-size:12px;
+      color:#ff9900;
+    }
+    /*左中右结构*/
+    .swipeout-image{
+      float:left;
+      width:40px;
+      height:40px;
+      line-height:40px;
+      text-align:center;
+      border-radius:40px;
+      background: #2d8cf0;
+    }
+    .swipeout-des{
+      margin-left:50px;
+    }
+    .swipeout-des-h2{
+      color: #444;
+    }
+    .swipeout-des-title {
+      display: flex;
+      justify-content: space-between;
+    }
+    .swipeout-des-tag {
+      /* */
+    }
+    .swipeout-des-detail{
+      font-size:12px;
+      word-break:break-all;
+      color:#80848f;
+    }
+
+  .float-right {
+    float: right;
+  }
+
+</style>

@@ -1,0 +1,104 @@
+<template>
+  <view>
+    <view style="height: {{sysInfo.windowHeight-50}}px;">
+      <searchEntry wx:if="{{current==='search'}}"></searchEntry>
+      <posts wx:elif="{{current==='posts'}}" style="height: inherit;"></posts>
+      <setting wx:elif="{{current==='setting'}}" @loginSuccess.user="handleLoginSuccess"></setting>
+    </view>
+    <view class="tab-bar" >
+      <i-tab-bar current="{{ current }}" fixed bindchange="handleChange">
+        <i-tab-bar-item key="search" icon="search" current-icon="searchfill" title="搜索"></i-tab-bar-item>
+        <i-tab-bar-item key="posts" icon="collection" current-icon="collection_fill" title="我的"></i-tab-bar-item>
+        <i-tab-bar-item key="setting" icon="setup" current-icon="setup_fill" title="设置"></i-tab-bar-item>
+      </i-tab-bar>
+    </view>
+  </view>
+
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import SearchEntry from '../components/search-entry'
+  import Posts from '../components/posts'
+  import Setting from '../components/setting'
+  export default class Index extends wepy.page {
+    config = {
+      navigationBarTitleText: '假装有标题',
+      usingComponents: {
+        'i-tab-bar': '../static/iview/tab-bar/index',
+        'i-tab-bar-item': '../static/iview/tab-bar-item/index',
+        'i-icon': '../static/iview/icon/index',
+        'i-toast': '../static/iview/toast/index',
+        'i-swipeout': '../static/iview/swipeout/index',
+        'i-action-sheet': '../static/iview/action-sheet/index',
+        'i-spin': '../static/iview/spin/index',
+        "i-cell-group": "../static/iview/cell-group/index",
+        "i-cell": "../static/iview/cell/index",
+      }
+    }
+
+    components = {
+      searchEntry: SearchEntry,
+      posts: Posts,
+      setting: Setting
+    }
+
+    data = {
+      current: 'search',
+      sysInfo: {windowHeight: 150}
+    }
+
+    methods = {
+
+      handleLoginSuccess(sessionId) {
+        this.$parent.globalData.sessionId = sessionId
+        console.log(this.$parent.globalData.sessionId)
+      },
+
+      handleChange({ detail }) {
+        console.log(detail.key)
+        this.current = detail.key
+        // this.$apply()
+      }
+
+    }
+
+    async onLoad() {
+      let self = this
+      // 获取设备信息
+      try {
+        let res = await this.$parent.getSysInfo()
+        if (res) {
+          console.log(res)
+          self.sysInfo = res
+          self.$apply()
+        }
+      } catch (e) {
+        console.log(e)
+      }
+
+      //  获取用户的信息, 新版改版之后必须绑定按钮使用
+      // try {
+      //   let res = await this.$parent.getUserInfo()
+      //   if (res) {
+      //     console.log(res)
+      //     self.userInfo = res
+      //     self.$apply()
+      //   }
+      // } catch (e) {
+      //   console.log(e)
+      // }
+
+    }
+
+  }
+</script>
+
+<style>
+  .tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+  }
+</style>
