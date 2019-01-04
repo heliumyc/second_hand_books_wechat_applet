@@ -30,7 +30,6 @@
   import SearchBar from '../components/search-bar'
   import SearchResultPanel from '../components/search-result-panel'
   const { $Toast } = require('../static/iview/base/index')
-  const bookTemplate = {title: 'Text Book 1', isbn: 'abcd3598jife', price: '15', contact: 'qq:1234567', note: 'hello!!!!!!', favorite: false, userId: "001"}
 
   export default class SearchResultPage extends wepy.page {
     config = {
@@ -131,7 +130,7 @@
     }
 
     async searchRequest(query, page=1, pageSize=this.pageSize) {
-      // 搜索, 向后台的RESTful api请求数据
+      // 搜索, 向后台api请求数据
       if (query === '') {
         this.showWarningToast('ooooooops, 检索式不能为空')
         return
@@ -152,41 +151,16 @@
         let body = res.data
         if (body.code === 0) {
           this.hits.unshift.apply(this.hits, body.data.books)
-          console.log(this.hits)
           this.$apply()
         } else {
-          console.log('err?')
-          this.showWarningToast('请求错误')
+          console.log(res.code, res.message)
+          this.showWarningToast('请求错误, code', res.code)
         }
       } catch (e) {
-        this.showWarningToast('请求超时')
+        this.showWarningToast('请求错误', e)
         console.log(e)
       }
-
-      // mock data
-      // let result = {
-      //   totalHitsNum: 50,
-      //   pageNum: 10,
-      //   hits: Array.from(new Array(10), (val,index)=>bookTemplate)
-      // }
-      // await this.sleep(1)
-      // console.log(result)
-      // this.hits.unshift.apply(this.hits, result.hits)
-      // console.log(this.hits)
-      // this.$apply()
-
-      // 更新数据
-
-
       this.hideLoadingToast()
-    }
-
-    sleep(second) {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          resolve()
-        }, second*1000)
-      })
     }
 
     showWarningToast(warningMsg) {
