@@ -3,7 +3,7 @@
     <view style="height: {{sysInfo.windowHeight-50}}px;">
       <searchEntry wx:if="{{current==='search'}}"></searchEntry>
       <posts wx:elif="{{current==='posts'}}" style="height: inherit;"></posts>
-      <setting wx:elif="{{current==='setting'}}" @loginSuccess.user="handleLoginSuccess"></setting>
+      <setting wx:elif="{{current==='setting'}}" :userInfo.sync="userInfo"></setting>
     </view>
     <view class="tab-bar" >
       <i-tab-bar current="{{ current }}" fixed bindchange="handleChange">
@@ -46,7 +46,12 @@
     data = {
       // current: 'search',
       current: 'setting',
-      sysInfo: {windowHeight: 150}
+      sysInfo: {windowHeight: 150},
+      userInfo: {
+        'name': '用户9527',
+        'contact': '出门右拐找隔壁老王',
+        'uid': '0'
+      }
     }
 
     methods = {
@@ -77,23 +82,55 @@
         console.log(e)
       }
 
-      try {
+      // 获取用户的信息, 新版改版之后必须绑定按钮使用
+      // 删除不用
 
+      // 自动登录
+      await this.login()
+    }
+
+    async login() {
+      try {
+        let res = await wepy.login()
+        if (res.code) {
+          console.log(res.code)
+          this.$parent.globalData.wxcode = res.code;
+          res = await wepy.request({
+            url: 'https://wxmini.heliumyc.top/api/users/login',
+            data: {
+              code: this.$parent.globalData.wxcode
+            }
+          })
+          let loginData = res.data
+          console.log(loginData)
+          if (loginData.data && loginData.code === 0) {
+            this.$parent.globalData.thirdSession = loginData.data.sessionId;
+            await this.getUserInfo()
+          }
+        }
       } catch (e) {
         console.log(e)
       }
+    }
 
-      //  获取用户的信息, 新版改版之后必须绑定按钮使用
-      // try {
-      //   let res = await this.$parent.getUserInfo()
-      //   if (res) {
-      //     console.log(res)
-      //     self.userInfo = res
-      //     self.$apply()
-      //   }
-      // } catch (e) {
-      //   console.log(e)
-      // }
+    async getUserInfo() {
+      try {
+        let res = await wepy.request({
+          url: 'https://wxmini.heliumyc.top/api/users/info',
+          header: {
+            Authorization: 'Bearer '+this.$parent.globalData.thirdSession
+          }
+        })
+        if (res.data && res.data.code === 0) {
+          let userData = res.data
+          this.userInfo.name = userData.data.name
+          this.userInfo.contact = userData.data.contact
+          this.userInfo.uid = userData.data.uid
+          this.$apply()
+        }
+      } catch (e) {
+        console.log(e)
+      }
 
     }
 

@@ -9,9 +9,9 @@
             style="display: flex; width: 675rpx; height: 250rpx; z-index: 10; background-color: white;">
         <image src="../static/yui.jpg" class="avatar" mode="aspectFit"></image>
         <view style="flex-grow: 1; height: inherit;display: flex;justify-content: center;flex-direction: column;">
-          <view class="name-card-username">用户名9527</view>
+          <view class="name-card-username">{{userInfo.name}}</view>
           <view class="name-card-contact" style="margin-top: 20rpx;">
-            <i-icon type="businesscard" size="20"/><p>出门右拐找隔壁老王</p></view>
+            <i-icon type="businesscard" size="20"/><p>{{userInfo.contact}}</p></view>
         </view>
       </view>
     </view>
@@ -48,8 +48,21 @@
       spinShow: false,
     }
 
+    props = {
+      userInfo: {
+        type: Object
+      }
+    }
+
     methods = {
 
+    }
+
+    async onLoad() {
+      console.log(this.userInfo)
+      setTimeout(() => {
+        console.log(this.userInfo)
+      }, 2000)
     }
 
     showWarningToast(warningMsg) {
