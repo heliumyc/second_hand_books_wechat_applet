@@ -11,14 +11,16 @@ export default class extends wepy.app {
     pages: [
       'pages/index',
       'pages/search-result-page',
-      'pages/book-list'
+      'pages/book-list',
+      'pages/book-edition',
+      'pages/favorite',
+      'pages/help-feedback'
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#2d8cf0',
       navigationBarTitleText: 'S/H book',
-      navigationBarTextStyle: 'white',
-      enablePullDownRefresh: true
+      navigationBarTextStyle: 'white'
     }
   }
 

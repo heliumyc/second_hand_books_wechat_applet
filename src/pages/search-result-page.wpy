@@ -40,7 +40,8 @@
         'i-toast': '../static/iview/toast/index',
         'i-spin': '../static/iview/spin/index',
         'i-card': '../static/iview/card/index'
-      }
+      },
+      enablePullDownRefresh: true,
     }
 
     components = {

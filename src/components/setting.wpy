@@ -1,14 +1,39 @@
 <!-- 一级页面: 设置页面-->
 <template>
-  <view style="height: inherit; background-color: rgb(224,224,224)">
+  <view style="height: inherit; background-color: #EEEEEE">
     <view style="padding-top: 25rpx;">
-      <view style="background-color: #2d8cf0;width: 100%; height: 75rpx; position: absolute; z-index: 1; top:0;"></view>
-      <!-- 750rpx -> 90% for 675rpx-->
+      <view style="background-color: #2d8cf0;width: 100%; height: 150rpx; position: absolute; z-index: 1; top:0;"></view>
+      <view style="background-color: #2d8cf0;width: 100%; height: 150rpx; position: absolute; z-index: 2; top:75rpx;clip-path: ellipse(50% 20% at 50% 50%);"></view>
+      <!-- 750rpx -> 90% to 675rpx-->
       <view class="name-card posited-middle"
-            style="width: 675rpx; height: 200rpx; z-index: 10; background-color: white;"></view>
+            style="display: flex; width: 675rpx; height: 250rpx; z-index: 10; background-color: white;">
+        <image src="../static/yui.jpg" class="avatar" mode="aspectFit"></image>
+        <view style="flex-grow: 1; height: inherit;display: flex;justify-content: center;flex-direction: column;">
+          <view class="name-card-username">用户名9527</view>
+          <view class="name-card-contact" style="margin-top: 20rpx;">
+            <i-icon type="businesscard" size="20"/><p>出门右拐找隔壁老王</p></view>
+        </view>
+      </view>
     </view>
     <view class="option-items">
-
+      <i-cell-group>
+        <i-cell title="修改信息" is-link url="/pages/profile-edition">
+          <i-icon type="editor" size="28" slot="icon" color="#2196F3" class="option-cell-icon"></i-icon>
+        </i-cell>
+        <i-cell title="我的收藏" is-link url="/pages/favorite" >
+          <i-icon type="collection" size="28" slot="icon" color="#FF9800" class="option-cell-icon"></i-icon>
+        </i-cell>
+        <i-cell title="帮助与反馈" is-link url="/pages/help-feedback">
+          <i-icon type="feedback" size="28" slot="icon" color="#4CAF50" class="option-cell-icon"></i-icon>
+        </i-cell>
+      </i-cell-group>
+      <!-- only as divider-->
+      <view style="height: 0;margin-top: 25rpx"></view>
+      <i-cell-group>
+        <i-cell title="删除帐号" is-link>
+          <i-icon type="trash" size="28" slot="icon" color="#F44336" class="option-cell-icon"></i-icon>
+        </i-cell>
+      </i-cell-group>
     </view>
     <i-toast id="toast"></i-toast>
   </view>
@@ -53,6 +78,7 @@
 
 <style lang="less">
   @inter-padding: 25rpx;
+
   // 加载提示
   .fixed-middle {
     position: fixed;
@@ -76,11 +102,30 @@
     box-shadow: 0 3px 8px 0 rgba(255, 255, 255, 0.25);
   }
 
+  .avatar {
+    width: 175rpx;
+    height: 175rpx;
+    clip-path: circle(50% at 50% 50%);
+    margin-top: 40rpx;
+    margin-left: 50rpx;
+    margin-right: 50rpx;
+  }
+
+  .name-card-username {
+    font-size: 35rpx;
+    text-shadow: 0.01em 0.01em 0.01em #999999 !important;
+  }
+
+  .name-card-contact {
+    font-size: 30rpx;
+  }
+
   .option-items {
     margin-top: @inter-padding;
   }
 
-
-
+  .option-cell-icon {
+    margin-right: 25rpx;
+  }
 
 </style>

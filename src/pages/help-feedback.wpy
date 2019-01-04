@@ -1,0 +1,40 @@
+<template>
+  <TextCard class="text-card">
+    <text slot="title">About this</text>
+    <view slot="content">
+      <view style="margin-bottom: 10rpx">This is only a personal toy project based on WeChat mini program</view>
+      <view style="margin-bottom: 10rpx">Utilizing Java spring boot framework as backend api support and</view>
+      <view style="margin-bottom: 10rpx">
+        Employing Wepy (Vue-like framework specified for mini program) as frontend dev tool and iView as UI lib.
+      </view>
+    </view>
+  </TextCard>
+  <TextCard class="text-card">
+    <text slot="title">About developer</text>
+    <view slot="content">
+      <view style="margin-bottom: 10rpx">If you got any idea or complaint, feel free to contact me (ericyc4@qq.com)</view>
+      <view>This project is open source at github (github.com/heliumyc)</view>
+    </view>
+  </TextCard>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  import TextCard from '../components/text-card'
+
+  export default class HelpFeedback extends wepy.page {
+    config = {
+      navigationBarTitleText: 'Help & Feedback',
+    }
+
+    components = {
+      TextCard: TextCard,
+    }
+  }
+</script>
+
+<style scoped>
+ .text-card {
+   margin: 30rpx 15rpx;
+ }
+</style>

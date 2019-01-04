@@ -1,0 +1,15 @@
+<template>
+  <view>all is your favorite</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class Favorite extends wepy.page {
+
+  }
+</script>
+
+<style scoped>
+
+</style>

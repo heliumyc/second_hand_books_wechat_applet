@@ -1,0 +1,15 @@
+<template>
+  <view>hello! feel free to edit your book</view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+
+  export default class BookEdition extends wepy.page {
+
+  }
+</script>
+
+<style scoped>
+
+</style>
