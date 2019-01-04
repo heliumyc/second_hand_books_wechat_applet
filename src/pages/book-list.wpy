@@ -3,8 +3,6 @@
     <view>
 
     </view>
-    <bookListPanel>
-    </bookListPanel>
   </view>
 </template>
 
@@ -21,7 +19,6 @@
       }
     }
     components = {
-      postListPanel: PostListPanel
     }
     data = {
 

@@ -77,6 +77,12 @@
         console.log(e)
       }
 
+      try {
+
+      } catch (e) {
+        console.log(e)
+      }
+
       //  获取用户的信息, 新版改版之后必须绑定按钮使用
       // try {
       //   let res = await this.$parent.getUserInfo()
