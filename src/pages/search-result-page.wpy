@@ -114,7 +114,7 @@
 
     async onLoad(option) {
       // 当页面开始加载触发函数, 注意wx的规则是先渲染DOM然后触发onload
-      console.log(option)
+      // console.log(option)
       this.query = option.query
       await this.searchRequest(this.query)
       console.log('done!')

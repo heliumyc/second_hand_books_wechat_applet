@@ -87,7 +87,7 @@
           if (success) {
             item.favorite = false;
             $Toast({
-              content: '取消成功! =ω=',
+              content: '取消成功! = ω =',
               type: 'success',
               duration: 1
             });

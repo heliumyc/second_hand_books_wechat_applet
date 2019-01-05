@@ -17,7 +17,7 @@
     </view>
     <view class="option-items">
       <i-cell-group>
-        <i-cell title="修改信息" is-link url="/pages/profile-edition">
+        <i-cell title="修改信息" is-link @click="navigateToProfileEdition">
           <i-icon type="editor" size="28" slot="icon" color="#2196F3" class="option-cell-icon"></i-icon>
         </i-cell>
         <i-cell title="我的收藏" is-link url="/pages/favorite" >
@@ -55,7 +55,11 @@
     }
 
     methods = {
-
+      navigateToProfileEdition() {
+        wepy.navigateTo({
+          url: '/pages/profile-edition?userInfo='+JSON.stringify(this.userInfo)
+        })
+      }
     }
 
     async onLoad() {

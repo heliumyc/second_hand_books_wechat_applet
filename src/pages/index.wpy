@@ -56,14 +56,8 @@
 
     methods = {
 
-      handleLoginSuccess(sessionId) {
-        this.$parent.globalData.sessionId = sessionId
-        console.log(this.$parent.globalData.sessionId)
-      },
-
       handleChange({ detail }) {
         this.current = detail.key
-        // this.$apply()
       }
 
     }
@@ -84,8 +78,9 @@
 
       // 获取用户的信息, 新版改版之后必须绑定按钮使用
       // 删除不用
+    }
 
-      // 自动登录
+    async onShow() {
       await this.login()
     }
 

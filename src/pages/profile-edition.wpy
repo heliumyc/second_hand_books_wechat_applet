@@ -1,0 +1,123 @@
+<template>
+  <view style="margin: 50rpx 50rpx;">
+    <i-panel title="用户信息">
+      <i-input title="id" placeholder="{{userInfo.uid}}" disabled></i-input>
+      <i-input value="{{newName}}" title="昵称" autofocus placeholder="{{userInfo.name}}" maxlength="20" @change="handleNameChange"></i-input>
+      <i-input value="{{newContact}}" title="联系方式" placeholder="{{userInfo.contact}}" maxlength="50" @change="handleContactChange"></i-input>
+    </i-panel>
+    <i-button bind:click="handleClick" type="primary" loading="{{loading}}">提交</i-button>
+
+    <i-modal visible="{{ modalVisible }}" actions="{{modalActions}}" @click="handleActions">
+      <view>还没登录怎么修改信息嘛</view>
+    </i-modal>
+    <i-toast id="toast"></i-toast>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index');
+
+  export default class ProfileEdition extends wepy.page {
+    config = {
+      navigationBarTitleText: '编辑用户信息',
+      usingComponents: {
+        "i-modal": "../static/iview/modal/index",
+        "i-input": "../static/iview/input/index",
+        "i-button": "../static/iview/button/index",
+        "i-toast": "../static/iview/toast/index"
+      }
+    }
+
+    data = {
+      userInfo: {},
+      modalVisible: false,
+      modalActions: [
+        {
+          name: '好的'
+        }
+      ],
+      newName: '',
+      newContact: '',
+      loading: false,
+    }
+
+    components = {
+
+    }
+
+    methods = {
+      handleActions({ detail }) {
+        const index = detail.index
+        if (index === 0) {
+          wepy.navigateBack({delta: 1})
+        }
+      },
+
+      handleNameChange({ detail }) {
+        let str = detail.detail.value
+        this.newName = str
+      },
+
+      handleContactChange({ detail }) {
+        this.newContact = detail.detail.value
+      },
+
+      async handleClick() {
+        this.newName = this.newName === ''? this.userInfo.name: this.newName
+        this.newContact = this.newContact === ''? this.userInfo.contact: this.newContact
+        if ((this.newName === this.userInfo.name && this.newContact === this.userInfo.contact)) {
+          return
+        }
+        let newInfo = {
+          'uid': this.userInfo.uid,
+          'name': this.newName,
+          'contact': this.newContact
+        }
+        try {
+          this.loading = true
+          let res = await wepy.request({
+            url: 'https://wxmini.heliumyc.top/api/users/info',
+            method: 'PUT',
+            data: Object.assign(newInfo, {'sessionId': this.$parent.globalData.thirdSession})
+          })
+          let data = res.data
+          if (data && data.code === 0) {
+            $Toast({
+              content: "修改成功! = ω =",
+              type: 'success',
+            })
+            this.userInfo = newInfo
+          } else {
+            $Toast({
+              content: "修改失败哒! Σ(っ°Д °)っ",
+              type: 'error',
+            })
+          }
+        } catch (e) {
+          $Toast({
+            content: "请求超时",
+            type: 'error',
+          })
+          console.log(e)
+        } finally {
+          this.loading = false
+          this.$apply()
+        }
+
+      }
+    }
+
+    onLoad(option) {
+      this.userInfo = JSON.parse(option.userInfo)
+      if (!this.userInfo || !this.userInfo.uid || this.userInfo.uid === '0' || !this.$parent.globalData.thirdSession) {
+        this.modalVisible = true
+      }
+    }
+
+  }
+</script>
+
+<style scoped>
+
+</style>
