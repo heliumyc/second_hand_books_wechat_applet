@@ -1,0 +1,144 @@
+<template>
+  <view style="margin: 50rpx 50rpx;">
+    <i-panel title="书籍信息">
+      <i-input value="{{bookInfo.title}}" title="书名"
+               placeholder="书名" maxlength="30" @change="handleTitleChange"></i-input>
+      <i-input value="{{bookInfo.isbn}}" title="昵称"
+               placeholder="ISBN号(optional)" maxlength="20" @change="handleISBNChange"></i-input>
+      <i-input value="{{bookInfo.price}}" title="联系方式" type="number"
+               placeholder="价格" maxlength="5" @change="handlePriceChange"></i-input>
+      <i-input value="{{bookInfo.note}}" title="附注"
+               placeholder="附注, 标识书的其他信息(optional)" maxlength="50" @change="handleNoteChange"></i-input>
+    </i-panel>
+    <i-button @click="handleClick" type="primary" loading="{{loading}}">提交</i-button>
+
+    <i-toast id="toast"></i-toast>
+    <view wx:if="{{ loading }}" style="z-index: 1000" class="fixed-middle">
+      <i-spin size="large"></i-spin>
+    </view>
+  </view>
+</template>
+
+<script>
+  import wepy from 'wepy'
+  const { $Toast } = require('../static/iview/base/index');
+
+  export default class AddBook extends wepy.page {
+    config = {
+      navigationBarTitleText: '新增书籍',
+      usingComponents: {
+        "i-modal": "../static/iview/modal/index",
+        "i-input": "../static/iview/input/index",
+        "i-button": "../static/iview/button/index",
+        "i-toast": "../static/iview/toast/index",
+        'i-spin': '../static/iview/spin/index',
+      }
+    }
+
+    data = {
+      bookInfo: {},
+      loading: false,
+    }
+
+    components = {
+
+    }
+
+    methods = {
+      handleTitleChange({ detail }) {
+        this.bookInfo.title = detail.detail.value
+      },
+
+      handleISBNChange({ detail }) {
+        this.bookInfo.isbn = detail.detail.value
+      },
+
+      handlePriceChange({ detail }) {
+        this.bookInfo.price = detail.detail.value
+      },
+
+      handleNoteChange({ detail }) {
+        this.bookInfo.note = detail.detail.value
+      },
+
+      async handleClick() {
+        this.loading = true
+        try {
+          let res = await wepy.request({
+            url: 'https://wxmini.heliumyc.top/api/books/',
+            method: 'POST',
+            data: {
+              'sessionId': this.$parent.globalData.thirdSession,
+              'book': this.bookInfo
+            }
+          })
+          let data = res.data
+          console.log(res, data)
+          if (data && data.code === 0) {
+            $Toast({
+              content: "添加成功! = ω =",
+              type: 'success',
+            })
+          } else {
+            $Toast({
+              content: "添加失败哒! Σ(っ°Д °)っ",
+              type: 'error',
+            })
+          }
+        } catch (e) {
+          console.log(e)
+          $Toast({
+            content: "请求超时",
+            type: 'error',
+          })
+        } finally {
+          this.loading = false
+          this.$apply()
+        }
+      },
+
+    }
+
+    async onLoad(option) {
+      if (option.isbn) {
+        await this.getBookFromISBN(option.isbn)
+      }
+    }
+
+    async getBookFromISBN(isbn) {
+      this.loading = true
+      this.$apply()
+      try {
+        let res = await wepy.request({
+          url: 'https://wxmini.heliumyc.top/v2/book/isbn/'+isbn,
+          header: {
+            'Content-Type': 'json'
+          },
+        })
+        if (res && res.data) {
+          this.bookInfo.title = res.data.title
+          this.bookInfo.isbn = isbn
+          console.log(res.data)
+        }
+      } catch (e) {
+        console.log(e)
+      } finally {
+        this.loading = false
+        this.$apply()
+      }
+    }
+
+  }
+</script>
+
+<style scoped>
+  .fixed-middle {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 50%;
+    display: flex;
+    justify-content: center;
+  }
+</style>

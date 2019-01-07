@@ -64,9 +64,6 @@
 
     async onLoad() {
       console.log(this.userInfo)
-      setTimeout(() => {
-        console.log(this.userInfo)
-      }, 2000)
     }
 
     showWarningToast(warningMsg) {

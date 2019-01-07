@@ -48,8 +48,8 @@
       current: 'setting',
       sysInfo: {windowHeight: 150},
       userInfo: {
-        'name': '用户9527',
-        'contact': '出门右拐找隔壁老王',
+        'name': '匿名用户',
+        'contact': '没得联系方式',
         'uid': '0'
       }
     }
@@ -63,14 +63,12 @@
     }
 
     async onLoad() {
-      let self = this
       // 获取设备信息
       try {
         let res = await this.$parent.getSysInfo()
         if (res) {
-          console.log(res)
-          self.sysInfo = res
-          self.$apply()
+          this.sysInfo = res
+          this.$apply()
         }
       } catch (e) {
         console.log(e)
@@ -78,17 +76,28 @@
 
       // 获取用户的信息, 新版改版之后必须绑定按钮使用
       // 删除不用
+      await this.login()
+      await this.getUserInfo()
     }
 
     async onShow() {
-      await this.login()
+      if (this.$parent.globalData.indexRefresh) {
+        let success = false
+        this.$parent.globalData.indexRefresh = false
+        if (this.$parent.globalData.thirdSession) {
+          success = await this.getUserInfo()
+        }
+        if (success) {
+          await this.login()
+          await this.getUserInfo()
+        }
+      }
     }
 
     async login() {
       try {
         let res = await wepy.login()
         if (res.code) {
-          console.log(res.code)
           this.$parent.globalData.wxcode = res.code;
           res = await wepy.request({
             url: 'https://wxmini.heliumyc.top/api/users/login',
@@ -100,12 +109,13 @@
           console.log(loginData)
           if (loginData.data && loginData.code === 0) {
             this.$parent.globalData.thirdSession = loginData.data.sessionId;
-            await this.getUserInfo()
+            return true
           }
         }
       } catch (e) {
         console.log(e)
       }
+      return false
     }
 
     async getUserInfo() {
@@ -122,11 +132,12 @@
           this.userInfo.contact = userData.data.contact
           this.userInfo.uid = userData.data.uid
           this.$apply()
+          return true
         }
       } catch (e) {
         console.log(e)
       }
-
+      return false
     }
 
   }

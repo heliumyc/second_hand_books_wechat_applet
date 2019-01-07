@@ -70,6 +70,7 @@
     </view>
     <!-- 遮罩 -->
     <view hidden="{{!addClicked}}" class="cloak" @tap="handleSwitch"></view>
+    <i-toast id="toast"></i-toast>
   </view>
 </template>
 
@@ -108,7 +109,6 @@
     methods = {
       handleSwitch() {
         this.addClicked = !this.addClicked;
-        console.log('switched')
       },
 
       handleDeleteAction(title) {
@@ -134,21 +134,31 @@
       handleDeleteCancel() {
         this.actionSheetVisible = false;
         this.toggle = !this.toggle;
-        console.log('delete action canceled')
       },
 
       handleTapWrite() {
-
+        wepy.navigateTo({
+          url: '/pages/add-book'
+        })
       },
 
-      handleTapScan() {
-        let that = this
-        wx.scanCode({
-          success(res) {
-            console.log(res)
-            that.getBookFromISBN(res.result)
+      async handleTapScan() {
+        try {
+          let scanRes = await wepy.scanCode()
+          if (scanRes && scanRes.result) {
+            console.log(scanRes.result)
+            wepy.navigateTo({
+              url: '/pages/add-book?isbn='+scanRes.result
+            })
+          } else {
+            $Toast({
+              content: 'sorry, but scan has failed',
+              type: 'warning'
+            })
           }
-        })
+        } catch (e) {
+          console.log(e)
+        }
       },
     }
 
@@ -159,6 +169,10 @@
       }
       console.log(this.posts)
       this.$apply()
+    }
+
+    onShow() {
+      this.addClicked = false
     }
 
     async getUserPosts() {
@@ -182,25 +196,6 @@
         console.log(e)
         this.showErrorToast()
       }
-    }
-
-    async getBookFromISBN(isbnStr) {
-      let book = null
-      try {
-        let res = await wepy.request({
-          url: 'https://wxmini.heliumyc.top/v2/book/isbn/'+isbnStr,
-          header: {
-            'Content-Type': 'json'
-          },
-        })
-        if (res) {
-          book = {}
-          // load data to book
-        }
-      } catch (e) {
-        console.log(e)
-      }
-      return book
     }
 
     showLoadingToast() {

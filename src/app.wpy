@@ -16,6 +16,7 @@ export default class extends wepy.app {
       'pages/favorite',
       'pages/help-feedback',
       'pages/profile-edition',
+      'pages/add-book',
     ],
     window: {
       backgroundTextStyle: 'light',

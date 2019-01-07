@@ -88,6 +88,7 @@
               type: 'success',
             })
             this.userInfo = newInfo
+            this.$parent.globalData.indexRefresh = true
           } else {
             $Toast({
               content: "修改失败哒! Σ(っ°Д °)っ",
