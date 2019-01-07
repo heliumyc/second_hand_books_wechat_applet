@@ -19,13 +19,15 @@
   </view>
 </template>
 
+
+<!--  这个地方的绝大部分代码和add-book.wpy的雷同, 可以使用mixin, 以后重构的时候再考虑这个问题  -->
 <script>
   import wepy from 'wepy'
   const { $Toast } = require('../static/iview/base/index');
 
-  export default class AddBook extends wepy.page {
+  export default class EditBook extends wepy.page {
     config = {
-      navigationBarTitleText: '新增书籍',
+      navigationBarTitleText: '编辑书籍',
       usingComponents: {
         "i-modal": "../static/iview/modal/index",
         "i-input": "../static/iview/input/index",
@@ -38,10 +40,6 @@
     data = {
       bookInfo: {},
       loading: false,
-    }
-
-    components = {
-
     }
 
     methods = {
@@ -65,8 +63,8 @@
         this.loading = true
         try {
           let res = await wepy.request({
-            url: 'https://wxmini.heliumyc.top/api/books/',
-            method: 'POST',
+            url: 'https://wxmini.heliumyc.top/api/books/'+this.bookInfo.bid,
+            method: 'PUT',
             data: {
               'sessionId': this.$parent.globalData.thirdSession,
               'book': this.bookInfo
@@ -76,13 +74,13 @@
           console.log(res, data)
           if (data && data.code === 0) {
             $Toast({
-              content: "添加成功! = ω =",
+              content: "修改成功! = ω =",
               type: 'success',
             })
             this.$parent.globalData.postsRefresh = true
           } else {
             $Toast({
-              content: "添加失败哒! Σ(っ°Д °)っ",
+              content: "修改失败哒! Σ(っ°Д °)っ",
               type: 'error',
             })
           }
@@ -101,31 +99,13 @@
     }
 
     async onLoad(option) {
-      if (option.isbn) {
-        await this.getBookFromISBN(option.isbn)
-      }
-    }
-
-    async getBookFromISBN(isbn) {
-      this.loading = true
-      this.$apply()
-      try {
-        let res = await wepy.request({
-          url: 'https://wxmini.heliumyc.top/v2/book/isbn/'+isbn,
-          header: {
-            'Content-Type': 'json'
-          },
-        })
-        if (res && res.data) {
-          this.bookInfo.title = res.data.title
-          this.bookInfo.isbn = isbn
-          console.log(res.data)
+      if (option.bookInfo) {
+        try {
+          this.bookInfo = JSON.parse(option.bookInfo)
+          this.$apply()
+        } catch (e) {
+          console.log(e)
         }
-      } catch (e) {
-        console.log(e)
-      } finally {
-        this.loading = false
-        this.$apply()
       }
     }
 

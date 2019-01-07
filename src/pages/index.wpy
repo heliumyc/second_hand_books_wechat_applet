@@ -2,7 +2,7 @@
   <view>
     <view style="height: {{sysInfo.windowHeight-50}}px;">
       <searchEntry wx:if="{{current==='search'}}"></searchEntry>
-      <posts wx:elif="{{current==='posts'}}" style="height: inherit;"></posts>
+      <posts wx:elif="{{current==='posts'}}" style="height: inherit;" :switched.sync="switched" :posts.sync="posts"></posts>
       <setting wx:elif="{{current==='setting'}}" :userInfo.sync="userInfo"></setting>
     </view>
     <view class="tab-bar" >
@@ -44,13 +44,20 @@
     }
 
     data = {
-      // current: 'search',
-      current: 'setting',
+      current: 'search',
+      // current: 'setting',
       sysInfo: {windowHeight: 150},
       userInfo: {
         'name': '匿名用户',
         'contact': '没得联系方式',
         'uid': '0'
+      },
+      posts: []
+    }
+
+    computed = {
+      switched() {
+        return this.current === 'posts'
       }
     }
 
@@ -78,19 +85,29 @@
       // 删除不用
       await this.login()
       await this.getUserInfo()
+      await this.getUserPosts()
     }
 
     async onShow() {
       if (this.$parent.globalData.indexRefresh) {
-        let success = false
         this.$parent.globalData.indexRefresh = false
-        if (this.$parent.globalData.thirdSession) {
-          success = await this.getUserInfo()
-        }
-        if (success) {
-          await this.login()
-          await this.getUserInfo()
-        }
+        await this.tryRequest(this.getUserInfo)
+      }
+      if (this.$parent.globalData.postsRefresh) {
+        this.$parent.globalData.postsRefresh = false
+        await this.tryRequest(this.getUserPosts)
+      }
+    }
+
+    async tryRequest(asyncFunc) {
+      let success = false
+      let self = this
+      if (this.$parent.globalData.thirdSession) {
+        success = await asyncFunc(self)
+      }
+      if (success) {
+        await this.login()
+        await asyncFunc(self)
       }
     }
 
@@ -118,26 +135,45 @@
       return false
     }
 
-    async getUserInfo() {
+    async getUserInfo(self) {
+      if (!self) self = this
       try {
         let res = await wepy.request({
           url: 'https://wxmini.heliumyc.top/api/users/info',
           header: {
-            Authorization: 'Bearer '+this.$parent.globalData.thirdSession
+            Authorization: 'Bearer '+self.$parent.globalData.thirdSession
           }
         })
         if (res.data && res.data.code === 0) {
           let userData = res.data
-          this.userInfo.name = userData.data.name
-          this.userInfo.contact = userData.data.contact
-          this.userInfo.uid = userData.data.uid
-          this.$apply()
+          self.userInfo.name = userData.data.name
+          self.userInfo.contact = userData.data.contact
+          self.userInfo.uid = userData.data.uid
+          self.$apply()
           return true
         }
       } catch (e) {
         console.log(e)
       }
       return false
+    }
+
+    async getUserPosts(self) {
+      if (!self) self = this
+      let success = false
+      try {
+        let res = await wepy.request({
+          url: 'https://wxmini.heliumyc.top/api/users/'+self.userInfo.uid+'/posts'
+        })
+        let body = res.data
+        if (body.code === 0 && body.data) {
+          self.posts = body.data.books
+          success = true
+        }
+      } catch (e) {
+        console.log(e)
+      }
+      return success
     }
 
   }

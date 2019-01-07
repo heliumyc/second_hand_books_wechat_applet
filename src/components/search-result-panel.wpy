@@ -32,11 +32,11 @@
               </view>
               <view class="card-btn-wrapper right-btn">
                 <button class="card-btn" @tap="handleEnter({{item}})"><view><i-icon type="enter"/></view></button>
-                <!--<button class="card-btn" @tap="handleFavorite({{index}})">-->
-                  <!--<view class="{{item.favorite?'rotate':''}}" style="transform-origin: center;">-->
-                    <!--<i-icon type="add"/>-->
-                  <!--</view>-->
-                <!--</button>-->
+                <button class="card-btn" @tap="handleFavorite({{index}})">
+                  <view class="{{item.favorite?'rotate':''}}" style="transform-origin: center;">
+                    <i-icon type="add"/>
+                  </view>
+                </button>
               </view>
             </view>
           </view>

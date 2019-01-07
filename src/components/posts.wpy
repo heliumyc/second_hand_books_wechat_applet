@@ -31,10 +31,10 @@
             </view>
           </view>
           <view slot="button" class="swipeout-button-group" style="background:#2db7f5;">
-            <view class="swipeout-button" style="background:#2d8cf0;" @tap="handleDeleteAction">
+            <view class="swipeout-button" style="background:#2d8cf0;" @tap="handleEditAction({{item}})">
               <i-icon size="26" type="brush_fill"></i-icon>
             </view>
-            <view class="swipeout-button" style="background:#ed3f14;" @tap="handleDeleteAction({{item.title}})">
+            <view class="swipeout-button" style="background:#ed3f14;" @tap="handleDeleteAction({{item}})">
               <i-icon size="26" type="delete_fill"></i-icon>
             </view>
           </view>
@@ -80,17 +80,6 @@
   const bookTemplate = {title: 'Text Book 1', isbn: 'abcd3598jife', price: '15', note: 'hello!!!!!!'};
   export default class Posts extends wepy.component {
 
-    props = {
-      sessionId: {
-        type: String,
-        default: ''
-      },
-      uid: {
-        type: Number,
-        default: -1
-      }
-    }
-
     data = {
       testList: Array.from(new Array(100),(val,index)=>index),
       addClicked: false,
@@ -106,13 +95,45 @@
       ],
     }
 
+    props = {
+      switched: {
+        default: false,
+        type: Boolean
+      },
+
+      posts: {
+        default: [],
+        type: Array
+      }
+    }
+
+    watch = {
+      switched(newVal, oldVal) {
+        if (newVal === true) {
+          this.addClicked = false
+          this.$apply()
+        }
+      },
+      posts(newVal, oldVal) {
+        console.log('posts have been changed', newVal)
+        this.$apply()
+      }
+    }
+
     methods = {
       handleSwitch() {
         this.addClicked = !this.addClicked;
       },
 
-      handleDeleteAction(title) {
-        console.log('delete action activated '+title);
+      handleEditAction(book) {
+        console.log(book)
+        wepy.navigateTo({
+          url: '/pages/edit-book?bookInfo='+JSON.stringify(book)
+        })
+      },
+
+      handleDeleteAction(book) {
+        console.log('delete action activated '+book);
         this.actionSheetVisible = true;
       },
 
@@ -160,68 +181,6 @@
           console.log(e)
         }
       },
-    }
-
-    onLoad() {
-      console.log(this.posts)
-      for (let i = 0; i < 10; i++) {
-        this.posts.push(bookTemplate)
-      }
-      console.log(this.posts)
-      this.$apply()
-    }
-
-    onShow() {
-      this.addClicked = false
-    }
-
-    async getUserPosts() {
-      this.showLoadingToast()
-      if (this.sessionId === '' || this.uid === -1) {
-        this.hideLoadingToast()
-        return
-      }
-      try {
-        let res = await wepy.request({
-          url: 'https://wxmini.heliumyc.top/api/user/'+this.uid+'/posts'
-        })
-        let body = res.data
-        if (body.code === 0 && body.data) {
-          this.showSuccessToast()
-          this.posts = body.data.books
-        } else {
-          this.showErrorToast()
-        }
-      } catch (e) {
-        console.log(e)
-        this.showErrorToast()
-      }
-    }
-
-    showLoadingToast() {
-      // 显示加载中的轻提示
-      $Toast.hide()
-      $Toast({
-        content: '非常努力地登陆中',
-        type: 'loading',
-        duration: 0
-      })
-    }
-
-    showErrorToast() {
-      $Toast.hide()
-      $Toast({
-        content: "获取失败...",
-        type: 'error',
-      })
-    }
-
-    showSuccessToast() {
-      this.hideLoadingToast()
-      $Toast({
-        content: "获取成功!",
-        type: 'success',
-      })
     }
 
   }
